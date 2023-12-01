@@ -1,4 +1,18 @@
 .show {
     display: block;
 }
-
+.delete-button {
+    cursor: pointer;
+    background-image: url("img/bucket-svgrepo-com.svg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-color: transparent;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background-position-x: 70px;
+    transition: background-position-x 0.5s;
+}
+tr:hover .delete-button {
+    background-position-x: 0;
+}

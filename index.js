@@ -80,62 +80,126 @@ const staffs = [
         employment_at: "2022-08-15"
     }
 ]
+
+const newStaffs = staffs;
+//Вывод формы
 const openModalButton = document.querySelector('.open-modal');
 const modalWindow = document.querySelector('.modal');
 const closeModalButton = document.querySelectorAll('.close-modal');
 function toggleModal() {
     modalWindow.classList.toggle('show');
+
+    const form = document.getElementById('form');
+    if (modalWindow.classList.contains('show')) {
+        form.reset();
+    }
 }
+
 closeModalButton.forEach(function(button) {
     button.addEventListener('click', toggleModal);
 });
 openModalButton.addEventListener('click', toggleModal);
 
 
-
-var tableBody = document.getElementById('table-body');
-
-// Функция для создания и добавления строк в таблицу
-function createTableRows(data) {
-    // Очищаем содержимое tbody перед добавлением новых строк
+//Вывод таблицы
+const tableBody = document.getElementById("table-body");
+const thList = document.querySelector("thead > tr").childNodes;
+function updateTable(staffs) {
     tableBody.innerHTML = '';
+    staffs.forEach((staff) => {
+        let tr = document.createElement("tr");
+        thList.forEach((th) => {
+            let td = document.createElement("td");
+            switch (th.textContent) {
+                case "#":
+                    td.innerHTML = staff.id;
+                    tr.appendChild(td);
+                    break;
+                case "Имя":
+                    td.innerHTML = staff.name;
+                    tr.appendChild(td);
+                    break;
+                case "Навыки":
+                    td.innerHTML = staff.skills.join(', ');
+                    tr.appendChild(td);
+                    break;
+                case "Дата":
+                    let date = new Date(staff.employment_at);
+                    td.innerHTML = date.toLocaleDateString("ru-RU");
+                    tr.appendChild(td);
+                    break;
+                case "Пол":
+                    td.innerHTML = staff.gender === "male" ? "мужской" : "женский";
+                    tr.appendChild(td);
+                    break;
+                case "Возраст":
+                    td.innerHTML = staff.age;
+                    tr.appendChild(td);
+                    break;
+                case "Зарплата":
+                    td.innerHTML = new Intl.NumberFormat("ru-RU", {currency: 'RUB', style: 'currency'}).format(staff.salary);
+                    tr.appendChild(td);
 
-    // Проходимся по массиву staffs и создаем строки и ячейки для каждого объекта
-    data.forEach(function(staff) {
-        var row = document.createElement('tr');
-
-        var idCell = document.createElement('td');
-        idCell.textContent = staff.id;
-        row.appendChild(idCell);
-
-        var nameCell = document.createElement('td');
-        nameCell.textContent = staff.name;
-        row.appendChild(nameCell);
-
-        var skillsCell = document.createElement('td');
-        skillsCell.textContent = staff.skills.join(', ');
-        row.appendChild(skillsCell);
-
-        var employmentCell = document.createElement('td');
-        employmentCell.textContent = staff.employment_at;
-        row.appendChild(employmentCell);
-
-        var genderCell = document.createElement('td');
-        genderCell.textContent = staff.gender;
-        row.appendChild(genderCell);
-
-        var ageCell = document.createElement('td');
-        ageCell.textContent = staff.age;
-        row.appendChild(ageCell);
-
-        var salaryCell = document.createElement('td');
-        salaryCell.textContent = staff.salary;
-        row.appendChild(salaryCell);
-
-        // Добавляем сформированную строку в tbody
-        tableBody.appendChild(row);
+                    const deleteButton = document.createElement('button');
+                    deleteButton.className = 'delete-button';
+                    // Удалние элемента при нажатии на кнопку "Удалить"
+                    deleteButton.addEventListener('click', function() {
+                        const index = newStaffs.indexOf(staff);
+                        if (index !== -1) {
+                            newStaffs.splice(index, 1);
+                            updateTable(newStaffs); // Обновление таблицы после удаления элемента
+                        }
+                    });
+                    const deleteButtonCell = document.createElement('td');
+                    deleteButtonCell.appendChild(deleteButton);
+                    tr.appendChild(deleteButtonCell);
+                    break;
+            }
+        });
+        tableBody.appendChild(tr);
     });
 }
 
-// Вызываем функцию для отображения данных в таблице при загрузке страницы
-createTableRows(staffs);
+updateTable(newStaffs);
+
+//добавляснеие new staff
+const lastStaff = staffs[staffs.length - 1];
+let idLastStaff = lastStaff.id;
+
+const saveBtnModal = document.querySelector('.save-modal');
+
+function saveModal(event) {
+    if (event.target === saveBtnModal) {
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        data.id = ++idLastStaff;
+        data.skills = data.skills.split(/,\s|,|\s/);
+
+        newStaffs.push(data);
+
+        updateTable(newStaffs);
+
+        toggleModal();
+    }
+}
+
+document.addEventListener('click', saveModal);
+
+// Фильтрация
+
+const filterInput = document.getElementById('filter');
+let filteredStaffs = newStaffs;
+
+filterInput.addEventListener('input', function() {
+    const inputValue = filterInput.value.toLowerCase().trim();
+    filteredStaffs = staffs.filter(function(staff) {
+        const nameMatch = staff.name.toLowerCase().includes(inputValue);
+        const skillsMatch = staff.skills.some(skill => skill.toLowerCase().includes(inputValue));
+        return nameMatch || skillsMatch;
+        });
+
+    updateTable(filteredStaffs);
+});
+
+
