@@ -82,13 +82,13 @@ const staffs = [
 ]
 
 const newStaffs = staffs;
-//Вывод формы
+
 const openModalButton = document.querySelector('.open-modal');
 const modalWindow = document.querySelector('.modal');
 const closeModalButton = document.querySelectorAll('.close-modal');
+
 function toggleModal() {
     modalWindow.classList.toggle('show');
-
     const form = document.getElementById('form');
     if (modalWindow.classList.contains('show')) {
         form.reset();
@@ -98,76 +98,65 @@ function toggleModal() {
 closeModalButton.forEach(function(button) {
     button.addEventListener('click', toggleModal);
 });
+
 openModalButton.addEventListener('click', toggleModal);
 
-
-//Вывод таблицы
 const tableBody = document.getElementById("table-body");
-const thList = document.querySelector("thead > tr").childNodes;
+
+function createDeleteButton(staff) {
+    const deleteButton = document.createElement('button');
+    deleteButton.className = 'delete-button';
+
+    deleteButton.addEventListener('click', function() {
+        const index = newStaffs.indexOf(staff);
+        if (index !== -1) {
+            newStaffs.splice(index, 1);
+            updateTable(newStaffs);
+        }
+    });
+
+    return deleteButton;
+}
+
+function createTableCell(content) {
+    const td = document.createElement('td');
+    td.textContent = content;
+    return td;
+}
+
+function createTableRow(staff) {
+    const tr = document.createElement('tr');
+
+    tr.appendChild(createTableCell(staff.id));
+    tr.appendChild(createTableCell(staff.name));
+    tr.appendChild(createTableCell(staff.skills.join(', ')));
+
+    const date = new Date(staff.employment_at);
+    tr.appendChild(createTableCell(date.toLocaleDateString("ru-RU")));
+
+    tr.appendChild(createTableCell(staff.gender === "male" ? "мужской" : "женский"));
+    tr.appendChild(createTableCell(staff.age));
+    tr.appendChild(createTableCell(new Intl.NumberFormat("ru-RU", {currency: 'RUB', style: 'currency'}).format(staff.salary)));
+
+    const deleteButtonCell = document.createElement('td');
+    deleteButtonCell.appendChild(createDeleteButton(staff));
+    tr.appendChild(deleteButtonCell);
+
+    return tr;
+}
+
 function updateTable(staffs) {
     tableBody.innerHTML = '';
     staffs.forEach((staff) => {
-        let tr = document.createElement("tr");
-        thList.forEach((th) => {
-            let td = document.createElement("td");
-            switch (th.textContent) {
-                case "#":
-                    td.innerHTML = staff.id;
-                    tr.appendChild(td);
-                    break;
-                case "Имя":
-                    td.innerHTML = staff.name;
-                    tr.appendChild(td);
-                    break;
-                case "Навыки":
-                    td.innerHTML = staff.skills.join(', ');
-                    tr.appendChild(td);
-                    break;
-                case "Дата":
-                    let date = new Date(staff.employment_at);
-                    td.innerHTML = date.toLocaleDateString("ru-RU");
-                    tr.appendChild(td);
-                    break;
-                case "Пол":
-                    td.innerHTML = staff.gender === "male" ? "мужской" : "женский";
-                    tr.appendChild(td);
-                    break;
-                case "Возраст":
-                    td.innerHTML = staff.age;
-                    tr.appendChild(td);
-                    break;
-                case "Зарплата":
-                    td.innerHTML = new Intl.NumberFormat("ru-RU", {currency: 'RUB', style: 'currency'}).format(staff.salary);
-                    tr.appendChild(td);
-
-                    const deleteButton = document.createElement('button');
-                    deleteButton.className = 'delete-button';
-                    // Удалние элемента при нажатии на кнопку "Удалить"
-                    deleteButton.addEventListener('click', function() {
-                        const index = newStaffs.indexOf(staff);
-                        if (index !== -1) {
-                            newStaffs.splice(index, 1);
-                            updateTable(newStaffs); // Обновление таблицы после удаления элемента
-                        }
-                    });
-                    const deleteButtonCell = document.createElement('td');
-                    deleteButtonCell.appendChild(deleteButton);
-                    tr.appendChild(deleteButtonCell);
-                    break;
-            }
-        });
-        tableBody.appendChild(tr);
+        tableBody.appendChild(createTableRow(staff));
     });
 }
 
 updateTable(newStaffs);
 
-//добавляснеие new staff
+const saveBtnModal = document.querySelector('.save-modal');
 const lastStaff = staffs[staffs.length - 1];
 let idLastStaff = lastStaff.id;
-
-const saveBtnModal = document.querySelector('.save-modal');
-
 function saveModal(event) {
     if (event.target === saveBtnModal) {
         const formData = new FormData(form);
@@ -186,8 +175,6 @@ function saveModal(event) {
 
 document.addEventListener('click', saveModal);
 
-// Фильтрация
-
 const filterInput = document.getElementById('filter');
 let filteredStaffs = newStaffs;
 
@@ -197,7 +184,7 @@ filterInput.addEventListener('input', function() {
         const nameMatch = staff.name.toLowerCase().includes(inputValue);
         const skillsMatch = staff.skills.some(skill => skill.toLowerCase().includes(inputValue));
         return nameMatch || skillsMatch;
-        });
+    });
 
     updateTable(filteredStaffs);
 });

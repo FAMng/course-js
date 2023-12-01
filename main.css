@@ -7,11 +7,11 @@
     background-repeat: no-repeat;
     background-size: cover;
     background-color: transparent;
-    width: 32px;
-    height: 32px;
+    width: 20px;
+    height: 20px;
     border: none;
     background-position-x: 70px;
-    transition: background-position-x 0.5s;
+    transition: background-position-x 0.3s;
 }
 tr:hover .delete-button {
     background-position-x: 0;
