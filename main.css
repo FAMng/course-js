@@ -3,16 +3,22 @@
 }
 .delete-button {
     cursor: pointer;
-    background-image: url("img/bucket-svgrepo-com.svg");
+    background-image: url("img/delete-svgrepo-com.svg");
     background-repeat: no-repeat;
     background-size: cover;
     background-color: transparent;
-    width: 20px;
-    height: 20px;
+    width: 40px;
+    height: 40px;
     border: none;
     background-position-x: 70px;
     transition: background-position-x 0.3s;
 }
 tr:hover .delete-button {
     background-position-x: 0;
+}
+td{
+    max-width: 200px;
+}
+.user-id{
+    width: 20px;
 }
