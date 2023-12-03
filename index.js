@@ -60,7 +60,7 @@ const staffs = [
         employment_at: "2023-02-28"
     },
     {
-        id: 7,
+        id: 97,
         name: "David",
         age: 29,
         gender: "male",
@@ -70,7 +70,7 @@ const staffs = [
         employment_at: "2021-11-05"
     },
     {
-        id: 8,
+        id: 85,
         name: "Sophia",
         age: 27,
         gender: "female",
@@ -81,7 +81,7 @@ const staffs = [
     }
 ]
 
-const newStaffs = staffs;
+const newStaffs = [...staffs];
 
 const openModalButton = document.querySelector('.open-modal');
 const modalWindow = document.querySelector('.modal');
@@ -155,14 +155,14 @@ function updateTable(staffs) {
 updateTable(newStaffs);
 
 const saveBtnModal = document.querySelector('.save-modal');
-const lastStaff = staffs[staffs.length - 1];
-let idLastStaff = lastStaff.id;
+let idLastStaff = Math.max(...staffs.map(staf => staf.id)) + 1;
+
 function saveModal(event) {
     if (event.target === saveBtnModal) {
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
 
-        data.id = ++idLastStaff;
+        data.id = idLastStaff;
         data.skills = data.skills.split(/,\s|,|\s/);
 
         newStaffs.push(data);
@@ -172,6 +172,7 @@ function saveModal(event) {
         toggleModal();
     }
 }
+
 
 document.addEventListener('click', saveModal);
 
