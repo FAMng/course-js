@@ -33,24 +33,27 @@
         </div>
     </div>
     <div class="row mt-5">
-        <div class="col">
+        <div class="col content-table">
             <table class="table table-sm table-striped table-hover">
                 <thead>
                     <tr>
                         <th scope="col" data-sort="id">#</th>
-                        <th scope="col" data-sort="userID" class="user-id">ID user</th>
-                        <th scope="col" data-sort="name">Имя</th>
-                        <th scope="col">Навыки</th>
-                        <th scope="col" data-sort="employment_at">Дата</th>
+                        <th scope="col" data-sort="first_name">Имя</th>
+                        <th scope="col" data-sort="last_name">Фамилия</th>
                         <th scope="col" data-sort="gender">Пол</th>
-                        <th scope="col" data-sort="age">Возраст</th>
-                        <th scope="col" data-sort="salary">Зарплата</th>
-                        <th scope="col" data-sort="title">Заголовок</th>
-                        <th scope="col" data-sort="body">Тело</th>
+                        <th scope="col" data-sort="email">email</th>
+                        <th scope="col" data-sort="country">Страна</th>
+                        <th scope="col" data-sort="state">Штат</th>
+                        <th scope="col" data-sort="city">Город</th>
+                        <th scope="col" data-sort="phone">Телефон</th>
                     </tr>
                 </thead>
                 <tbody id="table-body"></tbody>
             </table>
+            <div class="pagination">
+                <button id="prevPageButton" class="btn btn-primary">Предыдущая страница</button>
+                <button id="nextPageButton" class="btn btn-primary">Следующая страница</button>
+            </div>
         </div>
     </div>
     <div class="modal" tabindex="-1" id="modal">

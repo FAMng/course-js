@@ -16,9 +16,20 @@
 tr:hover .delete-button {
     background-position-x: 0;
 }
-td{
-    max-width: 200px;
-}
 .user-id{
     width: 20px;
+}
+.hidden {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
+.pagination{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
