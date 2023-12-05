@@ -9,6 +9,12 @@
 </head>
 <body>
 <div class="container">
+    <div class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="notifyBody">
+            </div>
+        </div>
+    </div>
     <menu class="nav nav-pills mb-4">
         <li class="nav-item">
             <a href="index.html" class="nav-link active">Главная</a>
@@ -33,21 +39,27 @@
         </div>
     </div>
     <div class="row mt-5">
-        <div class="col">
+        <div class="col content-table">
             <table class="table table-sm table-striped table-hover">
                 <thead>
                     <tr>
                         <th scope="col" data-sort="id">#</th>
-                        <th scope="col" data-sort="name">Имя</th>
-                        <th scope="col">Навыки</th>
-                        <th scope="col" data-sort="employment_at">Дата</th>
+                        <th scope="col" data-sort="first_name">Имя</th>
+                        <th scope="col" data-sort="last_name">Фамилия</th>
                         <th scope="col" data-sort="gender">Пол</th>
-                        <th scope="col" data-sort="age">Возраст</th>
-                        <th scope="col" data-sort="salary">Зарплата</th>
+                        <th scope="col" data-sort="email">email</th>
+                        <th scope="col" data-sort="country">Страна</th>
+                        <th scope="col" data-sort="state">Штат</th>
+                        <th scope="col" data-sort="city">Город</th>
+                        <th scope="col" data-sort="phone">Телефон</th>
                     </tr>
                 </thead>
                 <tbody id="table-body"></tbody>
             </table>
+            <div class="pagination">
+                <button id="prevPageButton" class="btn btn-primary">Предыдущая страница</button>
+                <button id="nextPageButton" class="btn btn-primary">Следующая страница</button>
+            </div>
         </div>
     </div>
     <div class="modal" tabindex="-1" id="modal">
@@ -80,30 +92,63 @@
                             <div class="mb-3">
                                 <div class="row">
                                     <div class="col">
-                                        <label for="staff-name" class="col-form-label">Имя:</label>
-                                        <input type="text" class="form-control" id="staff-name" name="name">
+                                        <label for="staff-first_name" class="col-form-label">Имя:</label>
+                                        <input type="text" class="form-control" id="staff-first_name" name="first_name">
+                                        <div class="invalid-feedback" id="invalid-first_name">
+                                            Некорректное имя
+                                        </div>
                                     </div>
                                     <div class="col">
-                                        <label for="staff-date" class="col-form-label">Дата:</label>
-                                        <input type="date" class="form-control" id="staff-date" name="employment_at">
+                                        <label for="staff-last_name" class="col-form-label">Фамилия:</label>
+                                        <input type="text" class="form-control" id="staff-last_name" name="last_name">
+                                        <div class="invalid-feedback" id="invalid-last_name">
+                                            Некорректная фамилия
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <label for="staff-email" class="col-form-label">Email:</label>
+                                        <input type="email" class="form-control" id="staff-email" name="email">
+                                        <div class="invalid-feedback" id="invalid-email">
+                                            Некорректный email
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <div class="row">
                                     <div class="col">
-                                        <label for="staff-salary" class="col-form-label">Зарплата:</label>
-                                        <input type="number" step="100" class="form-control" id="staff-salary" name="salary">
+                                        <label for="staff-state" class="col-form-label">Штат:</label>
+                                        <input type="text" step="100" class="form-control" id="staff-state" name="state">
+                                        <div class="invalid-feedback" id="invalid-state">
+                                            Некорректный штат
+                                        </div>
                                     </div>
                                     <div class="col">
-                                        <label for="staff-age" class="col-form-label">Возраст:</label>
-                                        <input type="number" class="form-control" id="staff-age" name="age">
+                                        <label for="staff-country" class="col-form-label">Страна:</label>
+                                        <input type="text" class="form-control" id="staff-country" name="country">
+                                        <div class="invalid-feedback" id="invalid-country">
+                                            Некорректная страна
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label for="staff-skills" class="col-form-label">Навыки:</label>
-                                <textarea class="form-control" id="staff-skills" name="skills" rows="6"></textarea>
+                                <div class="row">
+                                    <div class="col">
+                                        <label for="staff-city" class="col-form-label">Город:</label>
+                                        <input type="text" step="100" class="form-control" id="staff-city" name="city">
+                                        <div class="invalid-feedback" id="invalid-city">
+                                            Некорректный Город
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <label for="staff-phone" class="col-form-label">Телефон:</label>
+                                        <input type="text" class="form-control" id="staff-phone" name="phone">
+                                        <div class="invalid-feedback" id="invalid-phone">
+                                            Некорректный телефон
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </form>
                     </div>

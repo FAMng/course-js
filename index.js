@@ -1,193 +1,236 @@
-const staffs = [
-    {
-        id: 1,
-        name: "John",
-        age: 30,
-        gender: "male",
-        salary: 50000,
-        married: false,
-        skills: ["html", "css", "js"],
-        employment_at: "2020-01-01"
-    },
-    {
-        id: 2,
-        name: "Jane",
-        age: 25,
-        gender: "female",
-        salary: 40000,
-        married: true,
-        skills: ["html", "css", "js", "php"],
-        employment_at: "2023-06-21"
-    },
-    {
-        id: 3,
-        name: "Bob",
-        age: 35,
-        gender: "male",
-        salary: 60000,
-        married: false,
-        skills: ["html", "css", "js", "python"],
-        employment_at: "2021-03-15"
-    },
-    {
-        id: 4,
-        name: "Alice",
-        age: 28,
-        gender: "female",
-        salary: 45000,
-        married: true,
-        skills: ["html", "css"],
-        employment_at: "2022-09-01"
-    },
-    {
-        id: 5,
-        name: "Charlie",
-        age: 40,
-        gender: "male",
-        salary: 70000,
-        married: true,
-        skills: ["html", "css", "js", "python", "java"],
-        employment_at: "2020-07-10"
-    },
-    {
-        id: 6,
-        name: "Emily",
-        age: 32,
-        gender: "female",
-        salary: 50000,
-        married: true,
-        skills: ["js", "C++"],
-        employment_at: "2023-02-28"
-    },
-    {
-        id: 97,
-        name: "David",
-        age: 29,
-        gender: "male",
-        salary: 55000,
-        married: true,
-        skills: ["html", "css", "js"],
-        employment_at: "2021-11-05"
-    },
-    {
-        id: 85,
-        name: "Sophia",
-        age: 27,
-        gender: "female",
-        salary: 40000,
-        married: true,
-        skills: ["html", "css", "js"],
-        employment_at: "2022-08-15"
-    }
-]
+const basePOSTURL = 'https://jsonplaceholder.typicode.com/';
+const requestUrl = 'https://api.slingacademy.com/v1/sample-data/users';
+const tableBody = document.getElementById('table-body');
 
-const newStaffs = [...staffs];
-
-const openModalButton = document.querySelector('.open-modal');
 const modalWindow = document.querySelector('.modal');
 const closeModalButton = document.querySelectorAll('.close-modal');
 
-function toggleModal() {
+// Modal
+const toggleModal = () => {
     modalWindow.classList.toggle('show');
     const form = document.getElementById('form');
     if (modalWindow.classList.contains('show')) {
         form.reset();
     }
-}
+};
 
-closeModalButton.forEach(function(button) {
+closeModalButton.forEach((button) => {
     button.addEventListener('click', toggleModal);
 });
 
-openModalButton.addEventListener('click', toggleModal);
+document.querySelector('.open-modal').addEventListener('click', toggleModal);
 
-const tableBody = document.getElementById("table-body");
+// Delete element
+const notify = document.querySelector('.toast') || undefined;
+const notifyBody = document.getElementById('notifyBody');
 
-function createDeleteButton(staff) {
+const createDeleteButton = (staff) => {
     const deleteButton = document.createElement('button');
     deleteButton.className = 'delete-button';
-
-    deleteButton.addEventListener('click', function() {
-        const index = newStaffs.indexOf(staff);
-        if (index !== -1) {
-            newStaffs.splice(index, 1);
-            updateTable(newStaffs);
-        }
-    });
-
     return deleteButton;
-}
+};
 
-function createTableCell(content) {
+const handleRemove = async (id) => {
+    try {
+        const response = await fetch(`${basePOSTURL}/users/${id}`, {
+            method: 'DELETE',
+        });
+
+        if (response.ok) {
+            showNotification(`Элемент ${id} удален`);
+        } else {
+            showNotification(`Не удалось удалить элемент ${id}`);
+        }
+    } catch (error) {
+        console.error('Error deleting element:', error);
+        showNotification('Произошла ошибка при удалении элемента');
+    }
+};
+
+const showNotification = (message) => {
+    if (notify) {
+        notify.classList.add('show');
+        notifyBody.textContent = message;
+
+        setTimeout(() => {
+            notify.classList.remove('show');
+        }, 3000);
+    }
+};
+
+//Create table
+const createTableCell = (content) => {
     const td = document.createElement('td');
     td.textContent = content;
     return td;
-}
+};
 
-function createTableRow(staff) {
+const createTableRow = (staff) => {
     const tr = document.createElement('tr');
+    const genderCell = staff.gender ? createTableCell(staff.gender === 'male' ? 'мужской' : 'женский') : createTableCell('');
+    const deleteButtonCell = document.createElement('td');
 
     tr.appendChild(createTableCell(staff.id));
-    tr.appendChild(createTableCell(staff.name));
-    tr.appendChild(createTableCell(staff.skills.join(', ')));
+    tr.appendChild(createTableCell(staff.first_name));
+    tr.appendChild(createTableCell(staff.last_name));
+    tr.appendChild(genderCell);
+    tr.appendChild(createTableCell(staff.email));
+    tr.appendChild(createTableCell(staff.country));
+    tr.appendChild(createTableCell(staff.state));
+    tr.appendChild(createTableCell(staff.city));
+    tr.appendChild(createTableCell(staff.phone));
 
-    const date = new Date(staff.employment_at);
-    tr.appendChild(createTableCell(date.toLocaleDateString("ru-RU")));
-
-    tr.appendChild(createTableCell(staff.gender === "male" ? "мужской" : "женский"));
-    tr.appendChild(createTableCell(staff.age));
-    tr.appendChild(createTableCell(new Intl.NumberFormat("ru-RU", {currency: 'RUB', style: 'currency'}).format(staff.salary)));
-
-    const deleteButtonCell = document.createElement('td');
-    deleteButtonCell.appendChild(createDeleteButton(staff));
+    deleteButtonCell.setAttribute('valign', 'middle');
+    const deleteBtn = createDeleteButton(staff);
+    deleteBtn.addEventListener('click', () => {
+        handleRemove(staff.id);
+    });
+    deleteButtonCell.appendChild(deleteBtn);
     tr.appendChild(deleteButtonCell);
 
     return tr;
-}
+};
 
-function updateTable(staffs) {
+const updateTable = (staffs) => {
     tableBody.innerHTML = '';
     staffs.forEach((staff) => {
         tableBody.appendChild(createTableRow(staff));
     });
-}
+};
 
-updateTable(newStaffs);
+// SaveUser
+const saveUser = async (user) => {
+    const url = `${basePOSTURL}/users`;
 
-const saveBtnModal = document.querySelector('.save-modal');
-let idLastStaff = Math.max(...staffs.map(staf => staf.id)) + 1;
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(user),
+        });
 
-function saveModal(event) {
-    if (event.target === saveBtnModal) {
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-
-        data.id = idLastStaff;
-        data.skills = data.skills.split(/,\s|,|\s/);
-
-        newStaffs.push(data);
-
-        updateTable(newStaffs);
-
-        toggleModal();
+        if (response.ok) {
+            toggleModal();
+            return response.json();
+        } else {
+            throw new Error('Failed to save user');
+        }
+    } catch (error) {
+        console.error('Error saving user:', error);
+        showNotification('Произошла ошибка при создании пользователя');
     }
-}
+};
 
+const handleSave = async () => {
+    const formData = new FormData(document.getElementById('form'));
+    const data = Object.fromEntries(formData.entries()) || {};
 
-document.addEventListener('click', saveModal);
+    const getFormatFunc = {
+        default: (value) => value,
+    };
 
+    const validation = {
+        default: /[a-zA-Zа-яА-Я]{3,30}/,
+        email: /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/,
+        phone: /^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$/,
+    };
+
+    let isValid = true;
+
+    Object.keys(data).forEach((key) => {
+        const formatFunc = getFormatFunc[key] || getFormatFunc.default;
+        const regex = validation[key] || validation.default;
+        const formattedField = formatFunc(data[key]);
+
+        const input = document.getElementsByName(key)[0];
+
+        if (!regex.test(formattedField)) {
+            input.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            input.classList.remove('is-invalid');
+        }
+    });
+
+    if (!isValid) {
+        return;
+    }
+
+    const id = Math.max(...newStaffs.map((elem) => elem.id)) + 1;
+    const user = { ...data, id };
+
+    const response = await saveUser(user);
+
+    if (response) {
+        showNotification(`Пользователь сохранен с id=${user.id}`);
+    } else {
+        showNotification('Ошибка в создании пользователя');
+    }
+};
+
+document.querySelector('.save-modal').addEventListener('click', handleSave);
+
+// Filter
 const filterInput = document.getElementById('filter');
-let filteredStaffs = newStaffs;
+let filteredStaffs = [];
 
-filterInput.addEventListener('input', function() {
+filterInput.addEventListener('input', function () {
     const inputValue = filterInput.value.toLowerCase().trim();
-    filteredStaffs = staffs.filter(function(staff) {
-        const nameMatch = staff.name.toLowerCase().includes(inputValue);
-        const skillsMatch = staff.skills.some(skill => skill.toLowerCase().includes(inputValue));
-        return nameMatch || skillsMatch;
+    filteredStaffs = newStaffs.filter((staff) => {
+        const nameMatch = staff.first_name.toLowerCase().includes(inputValue);
+        const emailMatch = staff.email.toLowerCase().includes(inputValue);
+        return nameMatch || emailMatch;
     });
 
     updateTable(filteredStaffs);
 });
 
+// API
+let limitRequest = 10;
+let offsetRequest = 0;
 
+const sendRequestGet = (url, limit, offset) => {
+    const queryString = new URLSearchParams({
+        limit: limit,
+        offset: offset,
+    }).toString();
+
+    return fetch(`${url}?${queryString}`)
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            }
+            return response.json().then((error) => {
+                const e = new Error('Something went wrong');
+                e.data = error;
+                throw e;
+            });
+        });
+};
+
+const sendPaginatedRequest = () => {
+    sendRequestGet(requestUrl, limitRequest, offsetRequest)
+        .then((data) => {
+            newStaffs = data.users;
+            updateTable(newStaffs);
+        })
+        .catch((err) => console.log(err));
+};
+
+sendPaginatedRequest();
+
+document.getElementById('nextPageButton').addEventListener('click', () => {
+    offsetRequest += limitRequest;
+    sendPaginatedRequest();
+});
+
+document.getElementById('prevPageButton').addEventListener('click', () => {
+    if (offsetRequest >= limitRequest) {
+        offsetRequest -= limitRequest;
+        sendPaginatedRequest();
+    } else {
+        showNotification('Вы на первой странице');
+    }
+});
