@@ -132,7 +132,7 @@ const handleSave = async () => {
     };
 
     const validation = {
-        default: /^[A-ZА-Я'][a-zA-Zа-яА-Я' ]+$/,
+        default: /[a-zA-Zа-яА-Я]{3,30}/,
         email: /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/,
         phone: /^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$/,
     };
