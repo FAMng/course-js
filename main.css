@@ -3,12 +3,12 @@
 }
 .delete-button {
     cursor: pointer;
-    background-image: url("img/delete-svgrepo-com.svg");
+    background-image: url("img/delete-remove-uncheck-svgrepo-com.svg");
     background-repeat: no-repeat;
     background-size: cover;
     background-color: transparent;
-    width: 40px;
-    height: 40px;
+    width: 20px;
+    height: 20px;
     border: none;
     background-position-x: 70px;
     transition: background-position-x 0.3s;
@@ -32,4 +32,13 @@ tr:hover .delete-button {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+.toast {
+    position: absolute;
+    top: 40px;
+    right: 20px;
+    background-color: dodgerblue;
+    color: white;
+    text-align: center;
+    z-index: 999;
 }

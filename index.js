@@ -1,49 +1,74 @@
-let newStaffs = [];
+const basePOSTURL = 'https://jsonplaceholder.typicode.com/';
 const requestUrl = 'https://api.slingacademy.com/v1/sample-data/users';
-const tableBody = document.getElementById("table-body");
+const tableBody = document.getElementById('table-body');
 
-const openModalButton = document.querySelector('.open-modal');
 const modalWindow = document.querySelector('.modal');
 const closeModalButton = document.querySelectorAll('.close-modal');
 
-function toggleModal() {
+// Modal
+const toggleModal = () => {
     modalWindow.classList.toggle('show');
     const form = document.getElementById('form');
     if (modalWindow.classList.contains('show')) {
         form.reset();
     }
-}
+};
 
-closeModalButton.forEach(function (button) {
+closeModalButton.forEach((button) => {
     button.addEventListener('click', toggleModal);
 });
 
-openModalButton.addEventListener('click', toggleModal);
+document.querySelector('.open-modal').addEventListener('click', toggleModal);
 
-function createDeleteButton(staff) {
+// Delete element
+const notify = document.querySelector('.toast') || undefined;
+const notifyBody = document.getElementById('notifyBody');
+
+const createDeleteButton = (staff) => {
     const deleteButton = document.createElement('button');
     deleteButton.className = 'delete-button';
-
-    deleteButton.addEventListener('click', function () {
-        const index = newStaffs.indexOf(staff);
-        if (index !== -1) {
-            newStaffs.splice(index, 1);
-            updateTable(newStaffs);
-        }
-    });
-
     return deleteButton;
-}
+};
 
-function createTableCell(content) {
+const handleRemove = async (id) => {
+    try {
+        const response = await fetch(`${basePOSTURL}/users/${id}`, {
+            method: 'DELETE',
+        });
+
+        if (response.ok) {
+            showNotification(`Элемент ${id} удален`);
+        } else {
+            showNotification(`Не удалось удалить элемент ${id}`);
+        }
+    } catch (error) {
+        console.error('Error deleting element:', error);
+        showNotification('Произошла ошибка при удалении элемента');
+    }
+};
+
+const showNotification = (message) => {
+    if (notify) {
+        notify.classList.add('show');
+        notifyBody.textContent = message;
+
+        setTimeout(() => {
+            notify.classList.remove('show');
+        }, 3000);
+    }
+};
+
+//Create table
+const createTableCell = (content) => {
     const td = document.createElement('td');
     td.textContent = content;
     return td;
-}
+};
 
-function createTableRow(staff) {
+const createTableRow = (staff) => {
     const tr = document.createElement('tr');
-    const genderCell = staff.gender ? createTableCell(staff.gender === "male" ? "мужской" : "женский") : createTableCell('');
+    const genderCell = staff.gender ? createTableCell(staff.gender === 'male' ? 'мужской' : 'женский') : createTableCell('');
+    const deleteButtonCell = document.createElement('td');
 
     tr.appendChild(createTableCell(staff.id));
     tr.appendChild(createTableCell(staff.first_name));
@@ -55,47 +80,105 @@ function createTableRow(staff) {
     tr.appendChild(createTableCell(staff.city));
     tr.appendChild(createTableCell(staff.phone));
 
-    const deleteButtonCell = document.createElement('td');
     deleteButtonCell.setAttribute('valign', 'middle');
-    deleteButtonCell.appendChild(createDeleteButton(staff));
+    const deleteBtn = createDeleteButton(staff);
+    deleteBtn.addEventListener('click', () => {
+        handleRemove(staff.id);
+    });
+    deleteButtonCell.appendChild(deleteBtn);
     tr.appendChild(deleteButtonCell);
 
     return tr;
-}
+};
 
-function updateTable(staffs) {
+const updateTable = (staffs) => {
     tableBody.innerHTML = '';
     staffs.forEach((staff) => {
         tableBody.appendChild(createTableRow(staff));
     });
-}
+};
 
-const saveBtnModal = document.querySelector('.save-modal');
-let idLastStaff =  Math.max(newStaffs.map(staff => staff.id)) + 1;
+// SaveUser
+const saveUser = async (user) => {
+    const url = `${basePOSTURL}/users`;
 
-function saveModal(event) {
-    if (event.target === saveBtnModal) {
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(user),
+        });
 
-        data.id = idLastStaff;
-        newStaffs.push(data);
-
-        updateTable(newStaffs);
-
-        toggleModal();
+        if (response.ok) {
+            toggleModal();
+            return response.json();
+        } else {
+            throw new Error('Failed to save user');
+        }
+    } catch (error) {
+        console.error('Error saving user:', error);
+        showNotification('Произошла ошибка при создании пользователя');
     }
-}
+};
 
-document.addEventListener('click', saveModal);
+const handleSave = async () => {
+    const formData = new FormData(document.getElementById('form'));
+    const data = Object.fromEntries(formData.entries()) || {};
 
-// filter
+    const getFormatFunc = {
+        default: (value) => value,
+    };
+
+    const validation = {
+        default: /[a-zA-Zа-яА-я]{3,30}/,
+        email: /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/,
+        phone: /^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$/,
+    };
+
+    let isValid = true;
+
+    Object.keys(data).forEach((key) => {
+        const formatFunc = getFormatFunc[key] || getFormatFunc.default;
+        const regex = validation[key] || validation.default;
+        const formattedField = formatFunc(data[key]);
+
+        const input = document.getElementsByName(key)[0];
+
+        if (!regex.test(formattedField)) {
+            input.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            input.classList.remove('is-invalid');
+        }
+    });
+
+    if (!isValid) {
+        return;
+    }
+
+    const id = Math.max(...newStaffs.map((elem) => elem.id)) + 1;
+    const user = { ...data, id };
+
+    const response = await saveUser(user);
+
+    if (response) {
+        showNotification(`Пользователь сохранен с id=${user.id}`);
+    } else {
+        showNotification('Ошибка в создании пользователя');
+    }
+};
+
+document.querySelector('.save-modal').addEventListener('click', handleSave);
+
+// Filter
 const filterInput = document.getElementById('filter');
-let filteredStaffs = newStaffs;
+let filteredStaffs = [];
 
 filterInput.addEventListener('input', function () {
     const inputValue = filterInput.value.toLowerCase().trim();
-    filteredStaffs = newStaffs.filter(function (staff) {
+    filteredStaffs = newStaffs.filter((staff) => {
         const nameMatch = staff.first_name.toLowerCase().includes(inputValue);
         const emailMatch = staff.email.toLowerCase().includes(inputValue);
         return nameMatch || emailMatch;
@@ -104,48 +187,50 @@ filterInput.addEventListener('input', function () {
     updateTable(filteredStaffs);
 });
 
-// api
-let limitRequest = 5;
+// API
+let limitRequest = 10;
 let offsetRequest = 0;
-const totalPagesElement = document.getElementById('totalPages');
 
-// Обработчик для кнопки "Следующая страница"
-document.getElementById('nextPageButton').addEventListener('click', () => {
-    offsetRequest += limitRequest; // Увеличение смещения на размер limit
-    sendPaginatedRequest();
-});
+const sendRequestGet = (url, limit, offset) => {
+    const queryString = new URLSearchParams({
+        limit: limit,
+        offset: offset,
+    }).toString();
 
-// Обработчик для кнопки "Предыдущая страница"
-document.getElementById('prevPageButton').addEventListener('click', () => {
-    if (offsetRequest >= limitRequest) {
-        offsetRequest -= limitRequest; // Уменьшение смещения на размер limit, если больше limit
-        sendPaginatedRequest();
-    } else {
-        console.log('Вы на первой странице');
-    }
-});
-
-function sendPaginatedRequest() {
-    sendRequestGet(requestUrl, limitRequest, offsetRequest)
-        .then(data => {
-            newStaffs = data.users;
-            updateTable(newStaffs);
-        })
-        .catch(err => console.log(err));
-}
-// Функция для отправки GET запроса с учетом limit и offset
-function sendRequestGet(url, limit, offset) {
-    return fetch(`${url}?limit=${limit}&offset=${offset}`)
-        .then(response => {
+    return fetch(`${url}?${queryString}`)
+        .then((response) => {
             if (response.ok) {
                 return response.json();
             }
-            return response.json().then(error => {
-                const e = new Error('Что-то пошло не так');
+            return response.json().then((error) => {
+                const e = new Error('Something went wrong');
                 e.data = error;
                 throw e;
             });
         });
-}
+};
+
+const sendPaginatedRequest = () => {
+    sendRequestGet(requestUrl, limitRequest, offsetRequest)
+        .then((data) => {
+            newStaffs = data.users;
+            updateTable(newStaffs);
+        })
+        .catch((err) => console.log(err));
+};
 
 sendPaginatedRequest();
+
+document.getElementById('nextPageButton').addEventListener('click', () => {
+    offsetRequest += limitRequest;
+    sendPaginatedRequest();
+});
+
+document.getElementById('prevPageButton').addEventListener('click', () => {
+    if (offsetRequest >= limitRequest) {
+        offsetRequest -= limitRequest;
+        sendPaginatedRequest();
+    } else {
+        showNotification('Вы на первой странице');
+    }
+});
