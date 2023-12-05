@@ -24,7 +24,7 @@ document.querySelector('.open-modal').addEventListener('click', toggleModal);
 const notify = document.querySelector('.toast') || undefined;
 const notifyBody = document.getElementById('notifyBody');
 
-const createDeleteButton = (staff) => {
+const createDeleteButton = () => {
     const deleteButton = document.createElement('button');
     deleteButton.className = 'delete-button';
     return deleteButton;
@@ -234,3 +234,10 @@ document.getElementById('prevPageButton').addEventListener('click', () => {
         showNotification('Вы на первой странице');
     }
 });
+const limiteSelect = document.getElementById('limitSelect');
+
+limiteSelect.addEventListener("change", (e) =>{
+    limitRequest = parseInt(e.target.value);
+    offsetRequest = 0;
+    sendPaginatedRequest();
+})
