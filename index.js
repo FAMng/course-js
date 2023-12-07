@@ -159,7 +159,7 @@ const handleSave = async () => {
     }
 
     const id = Math.max(...newStaffs.map((elem) => elem.id)) + 1;
-    const user = { ...data, id };
+    const user = {...data, id};
 
     const response = await saveUser(user);
 
@@ -236,7 +236,7 @@ document.getElementById('prevPageButton').addEventListener('click', () => {
 });
 const limiteSelect = document.getElementById('limitSelect');
 
-limiteSelect.addEventListener("change", (e) =>{
+limiteSelect.addEventListener("change", (e) => {
     limitRequest = parseInt(e.target.value);
     offsetRequest = 0;
     sendPaginatedRequest();
