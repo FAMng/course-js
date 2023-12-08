@@ -73,7 +73,8 @@
                 </tbody>
             </table>
             <div class="pagination">
-                <button @click="prevPage" class="btn btn-primary">Предыдущая страница</button>
+                <button @click="prevPage" :disabled="isPrevButtonDisabled" class="btn btn-primary">Предыдущая
+                    страница</button>
                 <div class="dropdown">
                     <label for="limitSelect">Выберите количество:</label>
                     <select id="limitSelect" v-model="limit" @change="handleChange">
@@ -82,7 +83,8 @@
                         <option value="20">20</option>
                     </select>
                 </div>
-                <button @click="nextPage" class="btn btn-primary">Следующая страница</button>
+                <button @click="nextPage" :disabled="isNextButtonDisabled" class="btn btn-primary">Следующая
+                    страница</button>
             </div>
         </div>
     </div>
@@ -102,13 +104,15 @@
                                     <label class="col-form-label">Пол:</label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="gender" id="male" value="male" checked>
+                                    <input v-model="formData.gender" class="form-check-input" type="radio" name="gender" id="male"
+                                            value="male" checked>
                                     <label class="form-check-label" for="male">
                                         Мужской
                                     </label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="gender" id="female" value="female">
+                                    <input v-model="formData.gender" class="form-check-input" type="radio" name="gender" id="female"
+                                            value="female">
                                     <label class="form-check-label" for="female">
                                         Женский
                                     </label>
@@ -118,21 +122,24 @@
                                 <div class="row">
                                     <div class="col">
                                         <label for="staff-first_name" class="col-form-label">Имя:</label>
-                                        <input type="text" class="form-control" id="staff-first_name" name="first_name">
-                                        <div class="invalid-feedback" id="invalid-first_name">
+                                        <input  v-model="formData.first_name" type="text" class="form-control" id="staff-first_name"
+                                                name="first_name">
+                                        <div  class="invalid-feedback" id="invalid-first_name" >
                                             Некорректное имя
                                         </div>
                                     </div>
                                     <div class="col">
                                         <label for="staff-last_name" class="col-form-label">Фамилия:</label>
-                                        <input type="text" class="form-control" id="staff-last_name" name="last_name">
+                                        <input  v-model="formData.last_name" type="text" class="form-control"
+                                                id="staff-last_name" name="last_name">
                                         <div class="invalid-feedback" id="invalid-last_name">
                                             Некорректная фамилия
                                         </div>
                                     </div>
                                     <div class="col">
                                         <label for="staff-email" class="col-form-label">Email:</label>
-                                        <input type="email" class="form-control" id="staff-email" name="email">
+                                        <input  v-model="formData.email" type="email" class="form-control"
+                                                id="staff-email" name="email">
                                         <div class="invalid-feedback" id="invalid-email">
                                             Некорректный email
                                         </div>
@@ -143,14 +150,17 @@
                                 <div class="row">
                                     <div class="col">
                                         <label for="staff-state" class="col-form-label">Штат:</label>
-                                        <input type="text" step="100" class="form-control" id="staff-state" name="state">
+                                        <input  v-model="formData.state" type="text" step="100" class="form-control"
+                                                id="staff-state"
+                                                name="state">
                                         <div class="invalid-feedback" id="invalid-state">
                                             Некорректный штат
                                         </div>
                                     </div>
                                     <div class="col">
                                         <label for="staff-country" class="col-form-label">Страна:</label>
-                                        <input type="text" class="form-control" id="staff-country" name="country">
+                                        <input  v-model="formData.country" type="text" class="form-control"
+                                                id="staff-country" name="country">
                                         <div class="invalid-feedback" id="invalid-country">
                                             Некорректная страна
                                         </div>
@@ -161,14 +171,16 @@
                                 <div class="row">
                                     <div class="col">
                                         <label for="staff-city" class="col-form-label">Город:</label>
-                                        <input type="text" step="100" class="form-control" id="staff-city" name="city">
+                                        <input  v-model="formData.city" type="text" step="100" class="form-control"
+                                                id="staff-city" name="city">
                                         <div class="invalid-feedback" id="invalid-city">
                                             Некорректный Город
                                         </div>
                                     </div>
                                     <div class="col">
                                         <label for="staff-phone" class="col-form-label">Телефон:</label>
-                                        <input type="text" class="form-control" id="staff-phone" name="phone">
+                                        <input  v-model="formData.phone" type="text" class="form-control"
+                                                id="staff-phone" name="phone">
                                         <div class="invalid-feedback" id="invalid-phone">
                                             Некорректный телефон
                                         </div>
@@ -181,8 +193,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary close-modal"  @click="openCloseModal"
                             data-bs-dismiss="modal">Отменить</button>
-                    <button  @click="saveUser" type="submit" class="btn btn-primary save-modal"
-                             id="save-modal">Сохранить</button>
+                    <button @click="saveUser" type="submit" class="btn btn-primary save-modal">Сохранить</button>
                 </div>
             </div>
         </div>

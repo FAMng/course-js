@@ -6,13 +6,14 @@ let app = new Vue({
     data() {
         return {
             formData: {
-                firstName: '',
-                lastName: '',
+                gender: 'male',
+                first_name: '',
+                last_name: '',
                 email: '',
                 state: '',
                 country: '',
                 city: '',
-                phone: '',
+                phone: ''
             },
             validation: {
                 default: /[a-zA-Zа-яА-Я]{3,30}/,
@@ -33,10 +34,26 @@ let app = new Vue({
         totalPages() {
             return Math.ceil(this.total / this.limit);
         },
+        isNextButtonDisabled() {
+            return this.totalPages <= 1 || this.currentPage === this.totalPages;
+        },
+        isPrevButtonDisabled() {
+            return this.totalPages <= 1 || this.currentPage === 1;
+        },
     },
     methods: {
         openCloseModal() {
             this.showModal = !this.showModal;
+            this.formData = {
+                gender: 'male',
+                first_name: '',
+                last_name: '',
+                email: '',
+                state: '',
+                country: '',
+                city: '',
+                phone: ''
+            };
         },
         showNotification(message) {
             const notify = document.querySelector('.toast');
@@ -52,6 +69,9 @@ let app = new Vue({
             }
         },
         async saveUser() {
+            if (!this.validateForm()) {
+                return;
+            }
             try {
                 const response = await fetch(`${basePOSTURL}/users`, {
                     method: 'POST',
@@ -62,13 +82,53 @@ let app = new Vue({
                 });
 
                 if (response.ok) {
-                    this.showNotification('Данные успешно отправлены на сервер');
+                    this.showNotification('Данные успешно отправлены на сохранены');
+                    this.openCloseModal();
                 } else {
                     throw new Error('Failed to save user');
                 }
             } catch (error) {
                 console.error('Error saving user:', error);
                 this.showNotification('Произошла ошибка при создании пользователя');
+            }
+        },
+        validateForm() {
+            const fields = [
+                'first_name',
+                'last_name',
+                'email',
+                'state',
+                'country',
+                'city',
+                'phone'
+            ];
+
+            let isValid = true;
+
+            fields.forEach(field => {
+                const isValidField = this.validation[field === 'email' ? 'email' : field === 'phone' ? 'phone' : 'default'].test(this.formData[field]);
+                const fieldId = `invalid-${field}`;
+
+                if (!isValidField) {
+                    this.showInvalidFeedback(fieldId);
+                    isValid = false;
+                } else {
+                    this.hideInvalidFeedback(fieldId);
+                }
+            });
+
+            return isValid;
+        },
+        showInvalidFeedback(fieldId) {
+            const invalidField = document.getElementById(fieldId);
+            if (invalidField) {
+                invalidField.style.display = 'block';
+            }
+        },
+        hideInvalidFeedback(fieldId) {
+            const invalidField = document.getElementById(fieldId);
+            if (invalidField) {
+                invalidField.style.display = 'none';
             }
         },
         async handleRemove(id) {
@@ -111,6 +171,7 @@ let app = new Vue({
                 this.sendRequestGet();
             }
         },
+
         handleChange(event) {
             this.limit = parseInt(event.target.value);
             this.offset = 0;
