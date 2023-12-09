@@ -8,10 +8,10 @@
     <title>Lesson 1</title>
 </head>
 <body>
-<div class="container">
-    <div class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+<div class="container" id="app">
+    <div :class="{ 'toast': showToast }" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-            <div class="toast-body" id="notifyBody">
+            <div class="toast-body" v-if="showToast">{{ notificationMessage }}
             </div>
         </div>
     </div>
@@ -31,67 +31,88 @@
     </menu>
     <div class="row">
         <div class="col-6">
-            <input id="filter" class="form-control" type="text" placeholder="фильтр" aria-label="default input example">
+            <input v-model="searchQuery" id="filter" class="form-control" type="text" placeholder="фильтр"
+                   aria-label="default input example">
         </div>
         <div class="col"></div>
         <div class="col-1">
-            <button class="btn btn-primary open-modal">Добавить</button>
+            <button class="btn btn-primary open-modal" @click="openCloseModal">Добавить</button>
         </div>
     </div>
     <div class="row mt-5">
         <div class="col content-table">
             <table class="table table-sm table-striped table-hover">
                 <thead>
-                    <tr>
-                        <th scope="col" data-sort="id">#</th>
-                        <th scope="col" data-sort="first_name">Имя</th>
-                        <th scope="col" data-sort="last_name">Фамилия</th>
-                        <th scope="col" data-sort="gender">Пол</th>
-                        <th scope="col" data-sort="email">email</th>
-                        <th scope="col" data-sort="country">Страна</th>
-                        <th scope="col" data-sort="state">Штат</th>
-                        <th scope="col" data-sort="city">Город</th>
-                        <th scope="col" data-sort="phone">Телефон</th>
-                    </tr>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Имя</th>
+                    <th scope="col">Фамилия</th>
+                    <th scope="col">Пол</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Страна</th>
+                    <th scope="col">Штат</th>
+                    <th scope="col">Город</th>
+                    <th scope="col">Телефон</th>
+                </tr>
                 </thead>
-                <tbody id="table-body"></tbody>
+                <tbody>
+                <tr class="table-row" v-for="staff in staffs" :key="staff.id">
+                    <td>{{ staff.id }}</td>
+                    <td>{{ staff.first_name }}</td>
+                    <td>{{ staff.last_name }}</td>
+                    <td>{{ staff.gender === 'male' ? 'мужской' : 'женский' }}</td>
+                    <td>{{ staff.email }}</td>
+                    <td>{{ staff.country }}</td>
+                    <td>{{ staff.state }}</td>
+                    <td>{{ staff.city }}</td>
+                    <td>{{ staff.phone }}</td>
+                    <td>
+                        <button @click="handleRemove(staff.id)" class="delete-button"></button>
+                    </td>
+                </tr>
+                </tbody>
             </table>
             <div class="pagination">
-                <button id="prevPageButton" class="btn btn-primary">Предыдущая страница</button>
+                <button @click="prevPage" :disabled="isPrevButtonDisabled" class="btn btn-primary">Предыдущая
+                    страница</button>
                 <div class="dropdown">
                     <label for="limitSelect">Выберите количество:</label>
-                    <select id="limitSelect">
+                    <select id="limitSelect" v-model="limit" @change="handleChange">
                         <option value="5">5</option>
                         <option value="10" selected>10</option>
                         <option value="20">20</option>
                     </select>
                 </div>
-                <button id="nextPageButton" class="btn btn-primary">Следующая страница</button>
+                <button @click="nextPage" :disabled="isNextButtonDisabled" class="btn btn-primary">Следующая
+                    страница</button>
             </div>
         </div>
     </div>
-    <div class="modal" tabindex="-1" id="modal">
+    <div class="modal" :class="{ 'show': showModal }" tabindex="-1" id="modal">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Новый сотрудник</h5>
-                    <button type="button" class="btn-close close-modal" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close close-modal" @click="openCloseModal" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <form id="form">
+                        <form ref="form" id="form" @submit.prevent="saveUser">
                             <div class="mb-3">
                                 <div class="row">
                                     <label class="col-form-label">Пол:</label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="gender" id="male" value="male" checked>
+                                    <input v-model="formData.gender" class="form-check-input" type="radio" name="gender" id="male"
+                                            value="male" checked>
                                     <label class="form-check-label" for="male">
                                         Мужской
                                     </label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="gender" id="female" value="female">
+                                    <input v-model="formData.gender" class="form-check-input" type="radio" name="gender" id="female"
+                                            value="female">
                                     <label class="form-check-label" for="female">
                                         Женский
                                     </label>
@@ -101,22 +122,25 @@
                                 <div class="row">
                                     <div class="col">
                                         <label for="staff-first_name" class="col-form-label">Имя:</label>
-                                        <input type="text" class="form-control" id="staff-first_name" name="first_name">
-                                        <div class="invalid-feedback" id="invalid-first_name">
+                                        <input  v-model="formData.first_name" type="text" class="form-control" id="staff-first_name"
+                                                name="first_name">
+                                        <div :class="{ 'invalid': showInvalid.first_name }" class="invalid-feedback"  >
                                             Некорректное имя
                                         </div>
                                     </div>
                                     <div class="col">
                                         <label for="staff-last_name" class="col-form-label">Фамилия:</label>
-                                        <input type="text" class="form-control" id="staff-last_name" name="last_name">
-                                        <div class="invalid-feedback" id="invalid-last_name">
+                                        <input  v-model="formData.last_name" type="text" class="form-control"
+                                                id="staff-last_name" name="last_name">
+                                        <div class="invalid-feedback" :class="{ 'invalid': showInvalid.last_name }">
                                             Некорректная фамилия
                                         </div>
                                     </div>
                                     <div class="col">
                                         <label for="staff-email" class="col-form-label">Email:</label>
-                                        <input type="email" class="form-control" id="staff-email" name="email">
-                                        <div class="invalid-feedback" id="invalid-email">
+                                        <input  v-model="formData.email" type="email" class="form-control"
+                                                id="staff-email" name="email">
+                                        <div class="invalid-feedback" :class="{ 'invalid': showInvalid.email }">
                                             Некорректный email
                                         </div>
                                     </div>
@@ -126,15 +150,18 @@
                                 <div class="row">
                                     <div class="col">
                                         <label for="staff-state" class="col-form-label">Штат:</label>
-                                        <input type="text" step="100" class="form-control" id="staff-state" name="state">
-                                        <div class="invalid-feedback" id="invalid-state">
+                                        <input  v-model="formData.state" type="text" step="100" class="form-control"
+                                                id="staff-state"
+                                                name="state">
+                                        <div class="invalid-feedback" :class="{ 'invalid': showInvalid.state }">
                                             Некорректный штат
                                         </div>
                                     </div>
                                     <div class="col">
                                         <label for="staff-country" class="col-form-label">Страна:</label>
-                                        <input type="text" class="form-control" id="staff-country" name="country">
-                                        <div class="invalid-feedback" id="invalid-country">
+                                        <input  v-model="formData.country" type="text" class="form-control"
+                                                id="staff-country" name="country">
+                                        <div class="invalid-feedback" :class="{ 'invalid': showInvalid.country }">
                                             Некорректная страна
                                         </div>
                                     </div>
@@ -144,15 +171,17 @@
                                 <div class="row">
                                     <div class="col">
                                         <label for="staff-city" class="col-form-label">Город:</label>
-                                        <input type="text" step="100" class="form-control" id="staff-city" name="city">
-                                        <div class="invalid-feedback" id="invalid-city">
+                                        <input  v-model="formData.city" type="text" step="100" class="form-control"
+                                                id="staff-city" name="city">
+                                        <div class="invalid-feedback" :class="{ 'invalid': showInvalid.city }">
                                             Некорректный Город
                                         </div>
                                     </div>
                                     <div class="col">
                                         <label for="staff-phone" class="col-form-label">Телефон:</label>
-                                        <input type="text" class="form-control" id="staff-phone" name="phone">
-                                        <div class="invalid-feedback" id="invalid-phone">
+                                        <input  v-model="formData.phone" type="text" class="form-control"
+                                                id="staff-phone" name="phone">
+                                        <div class="invalid-feedback" :class="{ 'invalid': showInvalid.phone }">
                                             Некорректный телефон
                                         </div>
                                     </div>
@@ -162,13 +191,15 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary close-modal" data-bs-dismiss="modal">Отменить</button>
-                    <button type="button" class="btn btn-primary save-modal" id="save-modal">Сохранить</button>
+                    <button type="button" class="btn btn-secondary close-modal"  @click="openCloseModal"
+                            data-bs-dismiss="modal">Отменить</button>
+                    <button @click="saveUser" type="submit" class="btn btn-primary save-modal">Сохранить</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<script src="index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

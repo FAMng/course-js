@@ -41,4 +41,11 @@ tr:hover .delete-button {
     color: white;
     text-align: center;
     z-index: 999;
+    display: none;
+}
+.toast:not(.show) {
+    display: block;
+}
+.invalid{
+    display: block;
 }
