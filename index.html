@@ -9,9 +9,9 @@
 </head>
 <body>
 <div class="container" id="app">
-    <div class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+    <div :class="{ 'toast': showToast }" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-            <div class="toast-body" id="notifyBody">
+            <div class="toast-body" v-if="showToast">{{ notificationMessage }}
             </div>
         </div>
     </div>
@@ -56,7 +56,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr class="table-row" v-for="staff in displayedStaffs" :key="staff.id">
+                <tr class="table-row" v-for="staff in staffs" :key="staff.id">
                     <td>{{ staff.id }}</td>
                     <td>{{ staff.first_name }}</td>
                     <td>{{ staff.last_name }}</td>
@@ -98,7 +98,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <form id="form" @submit.prevent="saveUser">
+                        <form ref="form" id="form" @submit.prevent="saveUser">
                             <div class="mb-3">
                                 <div class="row">
                                     <label class="col-form-label">Пол:</label>
@@ -124,7 +124,7 @@
                                         <label for="staff-first_name" class="col-form-label">Имя:</label>
                                         <input  v-model="formData.first_name" type="text" class="form-control" id="staff-first_name"
                                                 name="first_name">
-                                        <div  class="invalid-feedback" id="invalid-first_name" >
+                                        <div :class="{ 'invalid': showInvalid.first_name }" class="invalid-feedback"  >
                                             Некорректное имя
                                         </div>
                                     </div>
@@ -132,7 +132,7 @@
                                         <label for="staff-last_name" class="col-form-label">Фамилия:</label>
                                         <input  v-model="formData.last_name" type="text" class="form-control"
                                                 id="staff-last_name" name="last_name">
-                                        <div class="invalid-feedback" id="invalid-last_name">
+                                        <div class="invalid-feedback" :class="{ 'invalid': showInvalid.last_name }">
                                             Некорректная фамилия
                                         </div>
                                     </div>
@@ -140,7 +140,7 @@
                                         <label for="staff-email" class="col-form-label">Email:</label>
                                         <input  v-model="formData.email" type="email" class="form-control"
                                                 id="staff-email" name="email">
-                                        <div class="invalid-feedback" id="invalid-email">
+                                        <div class="invalid-feedback" :class="{ 'invalid': showInvalid.email }">
                                             Некорректный email
                                         </div>
                                     </div>
@@ -153,7 +153,7 @@
                                         <input  v-model="formData.state" type="text" step="100" class="form-control"
                                                 id="staff-state"
                                                 name="state">
-                                        <div class="invalid-feedback" id="invalid-state">
+                                        <div class="invalid-feedback" :class="{ 'invalid': showInvalid.state }">
                                             Некорректный штат
                                         </div>
                                     </div>
@@ -161,7 +161,7 @@
                                         <label for="staff-country" class="col-form-label">Страна:</label>
                                         <input  v-model="formData.country" type="text" class="form-control"
                                                 id="staff-country" name="country">
-                                        <div class="invalid-feedback" id="invalid-country">
+                                        <div class="invalid-feedback" :class="{ 'invalid': showInvalid.country }">
                                             Некорректная страна
                                         </div>
                                     </div>
@@ -173,7 +173,7 @@
                                         <label for="staff-city" class="col-form-label">Город:</label>
                                         <input  v-model="formData.city" type="text" step="100" class="form-control"
                                                 id="staff-city" name="city">
-                                        <div class="invalid-feedback" id="invalid-city">
+                                        <div class="invalid-feedback" :class="{ 'invalid': showInvalid.city }">
                                             Некорректный Город
                                         </div>
                                     </div>
@@ -181,7 +181,7 @@
                                         <label for="staff-phone" class="col-form-label">Телефон:</label>
                                         <input  v-model="formData.phone" type="text" class="form-control"
                                                 id="staff-phone" name="phone">
-                                        <div class="invalid-feedback" id="invalid-phone">
+                                        <div class="invalid-feedback" :class="{ 'invalid': showInvalid.phone }">
                                             Некорректный телефон
                                         </div>
                                     </div>

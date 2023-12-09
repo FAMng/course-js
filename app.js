@@ -16,18 +16,28 @@ let app = new Vue({
                 phone: ''
             },
             validation: {
-                default: /[a-zA-Zа-яА-Я]{3,30}/,
+                default: /[A-zА-яёЁ]{3,30}/,
                 email: /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/,
                 phone: /^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$/,
             },
             showModal: false,
             staffs: [],
-            displayedStaffs: [],
             currentPage: 1,
             limit: 10,
             offset: 0,
             total: null,
             searchQuery: '',
+            notificationMessage: '',
+            showToast: false,
+            showInvalid: {
+                first_name: false,
+                last_name: false,
+                email: false,
+                state: false,
+                country: false,
+                city: false,
+                phone: false
+            },
         };
     },
     computed:{
@@ -43,30 +53,29 @@ let app = new Vue({
     },
     methods: {
         openCloseModal() {
-            this.showModal = !this.showModal;
-            this.formData = {
-                gender: 'male',
-                first_name: '',
-                last_name: '',
-                email: '',
-                state: '',
-                country: '',
-                city: '',
-                phone: ''
-            };
+            this.showModal = !this.showModal
+            if (!this.showModal) {
+                this.clearForm()
+            }
+
+        },
+        clearForm() {
+            for (let key in this.formData) {
+                if( key === 'gender') {
+                    this.formData[key] = 'male';
+                }else {
+                    this.formData[key] = '';
+                }
+            }
         },
         showNotification(message) {
-            const notify = document.querySelector('.toast');
-            const notifyBody = notify ? notify.querySelector('#notifyBody') : null;
+            this.notificationMessage = message;
+            this.showToast = true;
 
-            if (notify && notifyBody) {
-                notify.classList.add('show');
-                notifyBody.textContent = message;
-
-                setTimeout(() => {
-                    notify.classList.remove('show');
-                }, 2000);
-            }
+            setTimeout(() => {
+                this.showToast = false;
+                this.notificationMessage = '';
+            }, 2000);
         },
         async saveUser() {
             if (!this.validateForm()) {
@@ -82,7 +91,7 @@ let app = new Vue({
                 });
 
                 if (response.ok) {
-                    this.showNotification('Данные успешно отправлены на сохранены');
+                    this.showNotification('Данные успешно сохранены');
                     this.openCloseModal();
                 } else {
                     throw new Error('Failed to save user');
@@ -107,29 +116,16 @@ let app = new Vue({
 
             fields.forEach(field => {
                 const isValidField = this.validation[field === 'email' ? 'email' : field === 'phone' ? 'phone' : 'default'].test(this.formData[field]);
-                const fieldId = `invalid-${field}`;
 
                 if (!isValidField) {
-                    this.showInvalidFeedback(fieldId);
+                    this.$set(this.showInvalid, field, true);
                     isValid = false;
                 } else {
-                    this.hideInvalidFeedback(fieldId);
+                    this.$set(this.showInvalid, field, false);
                 }
             });
 
             return isValid;
-        },
-        showInvalidFeedback(fieldId) {
-            const invalidField = document.getElementById(fieldId);
-            if (invalidField) {
-                invalidField.style.display = 'block';
-            }
-        },
-        hideInvalidFeedback(fieldId) {
-            const invalidField = document.getElementById(fieldId);
-            if (invalidField) {
-                invalidField.style.display = 'none';
-            }
         },
         async handleRemove(id) {
             try {
@@ -148,15 +144,25 @@ let app = new Vue({
         },
 
         async sendRequestGet() {
-            await fetch(`${requestUrl}?limit=${this.limit}&offset=${this.offset}&search=${this.searchQuery}`)
-                .then(response => response.json())
-                .then(data => {
+            let url = `${requestUrl}?limit=${this.limit}&offset=${this.offset}`;
+
+            if (this.searchQuery.trim() !== '') {
+                url += `&search=${this.searchQuery}`;
+            }
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
                     this.staffs = data.users;
-                    this.displayedStaffs = this.staffs.slice(0, this.limit);
                     this.total = data.total_users;
-                })
-                .catch(err => console.log(err));
+                } else {
+                    throw new Error('Failed to fetch data');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
         },
+
         nextPage() {
             if (this.currentPage < this.totalPages) {
                 this.currentPage++;
@@ -167,7 +173,7 @@ let app = new Vue({
         prevPage() {
             if (this.currentPage > 1) {
                 this.currentPage--;
-                this.offset -= this.limit;
+                this.offset = this.offset - this.limit < 0 ? 0 : this.offset - this.limit;
                 this.sendRequestGet();
             }
         },
